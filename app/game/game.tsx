@@ -3,7 +3,6 @@ import { useState } from "react";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
-import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
 
 import CircularProgressWithLabel from "../ui/circularProgressWithLabel";
@@ -29,39 +28,84 @@ export function Game() {
     "Artemisa",
   ];
 
-  const nElementos = 9;
+  const maxHerbasRecollidas = 9;
+  const maxHerbasSeleccionadas = 15;
   const maxHoras = 10;
 
-  const [inventario, setInventario] = useState(Array(nElementos).fill(null));
+  const [herbasRecollidas, setHerbasRecollidas] = useState(
+    Array(maxHerbasRecollidas).fill(null)
+  );
+  const [herbasSeleccionadas, setHerbasSeleccionadas] = useState(
+    Array(maxHerbasSeleccionadas).fill(null)
+  );
   const [ano, setAno] = useState(1);
   const [horas, setHoras] = useState(0);
 
   const collerHerbas = function () {
-    setInventario((prevInventario) => {
-      const novoInventario = [...prevInventario];
-      for (let i = 0; i < novoInventario.length; i++) {
-        novoInventario[i] =
+    setHerbasRecollidas((prevHerbasRecollidas) => {
+      const novoHerbasRecollidas = [...prevHerbasRecollidas];
+      for (let i = 0; i < novoHerbasRecollidas.length; i++) {
+        novoHerbasRecollidas[i] =
           posiblesHerbas[Math.floor(Math.random() * posiblesHerbas.length)];
       }
-      return novoInventario;
+      return novoHerbasRecollidas;
     });
 
     setHoras((prevHoras) => {
-      const novasHoras = prevHoras + 1;
+      const novasHoras = prevHoras + maxHoras / 3;
       return novasHoras;
     });
   };
 
   const facerCacho = function () {
-    setInventario(Array(nElementos).fill(null));
+    setHerbasRecollidas(Array(maxHerbasRecollidas).fill(null));
+    setHerbasSeleccionadas(Array(maxHerbasSeleccionadas).fill(null));
     setAno(ano + 1);
+    setHoras(0);
   };
 
-  const listaInventario = inventario.map((item, index) => (
+  const recoller = function (item: string | null, index: number): void {
+    setHerbasRecollidas((prevHerbasRecollidas) => {
+      const novoHerbasRecollidas = [...prevHerbasRecollidas];
+      novoHerbasRecollidas[index] = null;
+      return novoHerbasRecollidas;
+    });
+
+    setHerbasSeleccionadas((prevHerbasSeleccionadas: (string | null)[]) => {
+      const novoHerbasRecollidas = [...prevHerbasSeleccionadas];
+      for (let i = 0; i < novoHerbasRecollidas.length; i++) {
+        if (novoHerbasRecollidas[i] === null) {
+          novoHerbasRecollidas[i] = item;
+          break;
+        }
+      }
+      return novoHerbasRecollidas;
+    });
+  };
+
+  const listaHerbasRecollidas = herbasRecollidas.map((item, index) => (
     <Grid size={4} key={index}>
-      <Paper elevation={3} style={{ padding: "16px" }}>
-        <Typography variant="body1">{item ? `${item}` : `Nada`}</Typography>
-      </Paper>
+      <Button
+        style={{ width: "100%" }}
+        variant="outlined"
+        onClick={() => recoller(item, index)}
+        disabled={!item}
+      >
+        {item ? `${item}` : `Nada`}
+      </Button>
+    </Grid>
+  ));
+
+  const listaHerbasSeleccionadas = herbasSeleccionadas.map((item, index) => (
+    <Grid size={4} key={index}>
+      <Button
+        style={{ width: "100%" }}
+        variant="outlined"
+        onClick={() => recoller(item, index)}
+        disabled={!item}
+      >
+        {item ? `${item}` : `Nada`}
+      </Button>
     </Grid>
   ));
 
@@ -81,28 +125,23 @@ export function Game() {
         }}
       >
         <Grid size={4}>
-          <Button variant="contained" onClick={collerHerbas}>
+          <Button
+            variant="contained"
+            onClick={collerHerbas}
+            disabled={horas >= maxHoras}
+          >
             Ir coller herbas
           </Button>
         </Grid>
-        <Grid size={8}>
-          <Grid
-            container
-            direction="row"
-            sx={{
-              justifyContent: "flex-end",
-              alignItems: "center",
-            }}
-          >
-            <Grid size={4}>
-              <Typography variant="body1">Progreso no día</Typography>
-            </Grid>
-            <Grid size={1}>
-              <CircularProgressWithLabel value={(horas / maxHoras) * 100} />
-            </Grid>
-          </Grid>
+
+        <Grid size={1}>
+          <CircularProgressWithLabel value={(horas / maxHoras) * 100} />
         </Grid>
       </Grid>
+
+      <Typography component="h2" gutterBottom>
+        Cesto
+      </Typography>
 
       <Grid
         style={{ marginTop: "16px", marginBottom: "16px" }}
@@ -110,7 +149,20 @@ export function Game() {
         rowSpacing={2}
         columnSpacing={2}
       >
-        {listaInventario}
+        {listaHerbasRecollidas}
+      </Grid>
+
+      <Typography component="h2" gutterBottom>
+        Herbas seleccionadas
+      </Typography>
+
+      <Grid
+        style={{ marginTop: "16px", marginBottom: "16px" }}
+        container
+        rowSpacing={2}
+        columnSpacing={2}
+      >
+        {listaHerbasSeleccionadas}
       </Grid>
 
       <Button variant="contained" onClick={facerCacho}>
