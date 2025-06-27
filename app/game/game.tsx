@@ -6,6 +6,7 @@ import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 
 import CircularProgressWithLabel from "../ui/circularProgressWithLabel";
+import SelectedBunchActions from "../ui/selectedBunchActions";
 
 import { Herb } from "../components/herb";
 import { Bunch } from "../components/bunch";
@@ -142,6 +143,14 @@ export function Game() {
     });
   };
 
+  const recollerTodo = function (): void {
+    for (let i = 0; i < pickedHerbs.length; i++) {
+      if (pickedHerbs[i] !== null) {
+        recoller(pickedHerbs[i], i);
+      }
+    }
+  };
+
   const pickedHerbsList = pickedHerbs.map((item, index) => (
     <Grid size={4} key={index}>
       <Button
@@ -156,39 +165,42 @@ export function Game() {
   ));
 
   const selectedHerbsList = selectedHerbs.map((item, index) => (
-    <Grid size={4} key={index}>
-      <Button
-        style={{ width: "100%" }}
-        variant="outlined"
-        onClick={() => recoller(item, index)}
-        disabled={!item}
-      >
-        {item ? `${item.herb.name}` : `Nada`}
-      </Button>
-    </Grid>
+    <SelectedBunchActions
+      key={index}
+      bunch={item}
+      onRemove={() => {
+        setSelectedHerbs((prevSelectedHerbs) => {
+          const newSelectedHerbs = [...prevSelectedHerbs];
+          newSelectedHerbs[index] = null;
+          return newSelectedHerbs;
+        });
+      }}
+    />
   ));
 
   const goalsList = goals.map((item, index) => (
     <Typography
       style={{
         textDecoration: item.completed ? "line-through" : "none",
+        marginBottom: "16px",
       }}
       key={index}
       component="p"
       gutterBottom
     >
-      {item.name} - {item.herbs.map((herb) => herb.name).join(", ")}
+      <b>{item.name}</b>
+      <br />
+      {item.herbs.map((herb) => herb.name).join(", ")}
     </Typography>
   ));
 
   return (
     <Container maxWidth="md">
+      <Typography variant="h4" gutterBottom>
+        Ano {ano}
+      </Typography>
       <Grid container>
         <Grid size={8}>
-          <Typography variant="h4" component="h1" gutterBottom>
-            Ano {ano}
-          </Typography>
-
           <Grid
             style={{ marginTop: "16px", marginBottom: "16px" }}
             container
@@ -213,12 +225,34 @@ export function Game() {
             </Grid>
           </Grid>
 
-          <Typography component="h2" gutterBottom>
-            Cesto
-          </Typography>
-
           <Grid
             style={{ marginTop: "16px", marginBottom: "16px" }}
+            container
+            direction="row"
+            sx={{
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Grid size={6}>
+              <Typography variant="h5" gutterBottom>
+                Cesto
+              </Typography>
+            </Grid>
+
+            <Grid size={6}>
+              <Button
+                variant="contained"
+                onClick={recollerTodo}
+                style={{ float: "right" }}
+              >
+                Coller todo
+              </Button>
+            </Grid>
+          </Grid>
+
+          <Grid
+            style={{ marginTop: "16px", marginBottom: "32px" }}
             container
             rowSpacing={2}
             columnSpacing={2}
@@ -226,7 +260,7 @@ export function Game() {
             {pickedHerbsList}
           </Grid>
 
-          <Typography component="h2" gutterBottom>
+          <Typography variant="h5" gutterBottom>
             Herbas seleccionadas
           </Typography>
 
@@ -243,8 +277,8 @@ export function Game() {
             Facer o cacho
           </Button>
         </Grid>
-        <Grid style={{ paddingTop: "64px", paddingLeft: "16px" }} size={4}>
-          <Typography component="h2" gutterBottom>
+        <Grid style={{ paddingLeft: "32px" }} size={4}>
+          <Typography variant="h5" gutterBottom>
             Retos
           </Typography>
           {goalsList}
