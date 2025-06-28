@@ -17,50 +17,51 @@ import { Goal } from "../components/goal";
 import { Place } from "../components/place";
 import { Map } from "../components/map";
 
+const herbs = [
+  new Herb("Fiuncho"),
+  new Herb("Malva"),
+  new Herb("Romeu"),
+  new Herb("Rosal silvestre"),
+  new Herb("Herba de San Xoán"),
+  new Herb("Herba luisa"),
+  new Herb("Fento macho"),
+  new Herb("Sabugueiro"),
+  new Herb("Flor de San Xoán"),
+  new Herb("Codeso"),
+  new Herb("Nogueira"),
+  new Herb("Loureiro"),
+  new Herb("Torvisco"),
+  new Herb("Ruda"),
+  new Herb("Hierbabuena"),
+  new Herb("Salvia"),
+  new Herb("Artemisa"),
+];
+
+function getRandomHerbs(count: number): Herb[] {
+  const herbsCopy = [...herbs];
+  const shuffled = herbsCopy.sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+}
+
+const home = new Place("Casa", []);
+
+const map = new Map([
+  [
+    null,
+    new Place("Monte", getRandomHerbs(3)),
+    new Place("Cemiterio", getRandomHerbs(3)),
+  ],
+  [
+    new Place("Río", getRandomHerbs(3)),
+    home,
+    new Place("Igrexa", getRandomHerbs(3)),
+  ],
+  [null, new Place("Bosque", getRandomHerbs(3)), null],
+]);
+
 export function Game() {
-  const herbs = [
-    new Herb("Fiuncho"),
-    new Herb("Malva"),
-    new Herb("Romeu"),
-    new Herb("Rosal silvestre"),
-    new Herb("Herba de San Xoán"),
-    new Herb("Herba luisa"),
-    new Herb("Fento macho"),
-    new Herb("Sabugueiro"),
-    new Herb("Flor de San Xoán"),
-    new Herb("Codeso"),
-    new Herb("Nogueira"),
-    new Herb("Loureiro"),
-    new Herb("Torvisco"),
-    new Herb("Ruda"),
-    new Herb("Hierbabuena"),
-    new Herb("Salvia"),
-    new Herb("Artemisa"),
-  ];
-
-  function getRandomHerbs(count: number): Herb[] {
-    const herbsCopy = [...herbs];
-    const shuffled = herbsCopy.sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, count);
-  }
-
-  const home = new Place("Casa", []);
-
-  const map = new Map([
-    [
-      null,
-      new Place("Monte", getRandomHerbs(3)),
-      new Place("Cemiterio", getRandomHerbs(3)),
-    ],
-    [
-      new Place("Río", getRandomHerbs(3)),
-      home,
-      new Place("Igrexa", getRandomHerbs(3)),
-    ],
-    [null, new Place("Bosque", getRandomHerbs(3)), null],
-  ]);
-
   const maxPickedHerbs = 9;
+  const minPickedHerbs = 3;
   const maxSelectedHerbs = 15;
   const maxHoras = 10;
 
@@ -83,7 +84,9 @@ export function Game() {
   const [openModal, setOpenModal] = useState(false);
 
   const collerHerbas = function (position: Place) {
-    const nPickedHerbs = Math.floor(Math.random() * (maxPickedHerbs - 1)) + 1;
+    const nPickedHerbs =
+      Math.floor(Math.random() * (maxPickedHerbs - minPickedHerbs)) +
+      minPickedHerbs;
     console.log("N picked herbs:", nPickedHerbs);
 
     setPickedHerbs((prevpickedHerbs) => {
