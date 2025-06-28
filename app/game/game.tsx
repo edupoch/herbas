@@ -3,7 +3,10 @@ import { useState } from "react";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
+import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
+import Modal from "@mui/material/Modal";
+import Stack from "@mui/material/Stack";
 
 import CircularProgressWithLabel from "../ui/circularProgressWithLabel";
 import SelectedBunchActions from "../ui/selectedBunchActions";
@@ -11,6 +14,8 @@ import SelectedBunchActions from "../ui/selectedBunchActions";
 import { Herb } from "../components/herb";
 import { Bunch } from "../components/bunch";
 import { Goal } from "../components/goal";
+import { Place } from "../components/place";
+import { Map } from "../components/map";
 
 export function Game() {
   const herbs = [
@@ -33,6 +38,28 @@ export function Game() {
     new Herb("Artemisa"),
   ];
 
+  function getRandomHerbs(count: number): Herb[] {
+    const herbsCopy = [...herbs];
+    const shuffled = herbsCopy.sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+  }
+
+  const home = new Place("Casa", []);
+
+  const map = new Map([
+    [
+      null,
+      new Place("Monte", getRandomHerbs(3)),
+      new Place("Cemiterio", getRandomHerbs(3)),
+    ],
+    [
+      new Place("Río", getRandomHerbs(3)),
+      home,
+      new Place("Igrexa", getRandomHerbs(3)),
+    ],
+    [null, new Place("Bosque", getRandomHerbs(3)), null],
+  ]);
+
   const maxPickedHerbs = 9;
   const maxSelectedHerbs = 15;
   const maxHoras = 10;
@@ -52,14 +79,26 @@ export function Game() {
     new Goal("Cacho de Alba", [herbs[4], herbs[5]]),
   ]);
 
-  const collerHerbas = function () {
+  const [position, setPosition] = useState(home);
+  const [openModal, setOpenModal] = useState(false);
+
+  const collerHerbas = function (position: Place) {
+    const nPickedHerbs = Math.floor(Math.random() * (maxPickedHerbs - 1)) + 1;
+    console.log("N picked herbs:", nPickedHerbs);
+
     setPickedHerbs((prevpickedHerbs) => {
       const newPickedHerbs = [...prevpickedHerbs];
-      for (let i = 0; i < newPickedHerbs.length; i++) {
+      console.log("Position herbs:", position.herbs);
+      newPickedHerbs.fill(null);
+      for (let i = 0; i < nPickedHerbs; i++) {
+        if (position.herbs.length === 0) {
+          break;
+        }
         newPickedHerbs[i] = new Bunch(
-          herbs[Math.floor(Math.random() * herbs.length)]
+          position.herbs[Math.floor(Math.random() * position.herbs.length)]
         );
       }
+      console.log("Picked herbs:", newPickedHerbs);
       return newPickedHerbs;
     });
 
@@ -178,6 +217,32 @@ export function Game() {
     />
   ));
 
+  const placesList = map.places.map((row, rowIndex) => (
+    <Grid container direction="row" rowSpacing={2} columnSpacing={2}>
+      {row.map((place, colIndex) => (
+        <Grid size={4}>
+          <Button
+            key={`place-${rowIndex}-${colIndex}`}
+            style={{ width: "100%" }}
+            variant={
+              place && place.name === position.name ? "contained" : "outlined"
+            }
+            disabled={!place}
+            onClick={() => {
+              if (!place) return;
+              console.log("Cambiando a posición:", place.name);
+              setOpenModal(false);
+              collerHerbas(place);
+              setPosition(place);
+            }}
+          >
+            {place ? place.name : "Nada"}
+          </Button>
+        </Grid>
+      ))}
+    </Grid>
+  ));
+
   const goalsList = goals.map((item, index) => (
     <Typography
       style={{
@@ -199,6 +264,9 @@ export function Game() {
       <Typography variant="h4" gutterBottom>
         Ano {ano}
       </Typography>
+      <Typography variant="body1" gutterBottom>
+        Posición: {position.name}
+      </Typography>
       <Grid container>
         <Grid size={8}>
           <Grid
@@ -212,12 +280,32 @@ export function Game() {
           >
             <Grid size={4}>
               <Button
+                key="coller-herbas"
                 variant="contained"
-                onClick={collerHerbas}
+                onClick={() => setOpenModal(true)}
                 disabled={horas >= maxHoras}
               >
                 Ir coller herbas
               </Button>
+              <Modal open={openModal} onClose={() => setOpenModal(false)}>
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    width: 800,
+                    bgcolor: "background.paper",
+                    boxShadow: 24,
+                    p: 4,
+                  }}
+                >
+                  <Typography variant="h6" component="h2" sx={{ mb: "16px" }}>
+                    Lugares
+                  </Typography>
+                  {placesList}
+                </Box>
+              </Modal>
             </Grid>
 
             <Grid size={1}>
