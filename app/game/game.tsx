@@ -164,6 +164,7 @@ export function Game() {
     setSelectedHerbs(Array(maxSelectedHerbs).fill(null));
     setAno(ano + 1);
     setHoras(0);
+    setPosition(home);
   };
 
   const recoller = function (item: string | null, index: number): void {
