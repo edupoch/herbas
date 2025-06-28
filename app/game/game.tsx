@@ -59,6 +59,8 @@ const map = new Map([
   [null, new Place("Bosque", getRandomHerbs(3)), null],
 ]);
 
+const cachoDaFamilia = getRandomHerbs(7);
+
 export function Game() {
   const maxPickedHerbs = 9;
   const minPickedHerbs = 3;
@@ -75,6 +77,7 @@ export function Game() {
   const [horas, setHoras] = useState(0);
 
   const [goals, setGoals] = useState([
+    new Goal("Cacho da túa familia", cachoDaFamilia),
     new Goal("Cacho de Maruja", [herbs[0], herbs[1]]),
     new Goal("Cacho de Ana", [herbs[2], herbs[3]]),
     new Goal("Cacho de Alba", [herbs[4], herbs[5]]),
