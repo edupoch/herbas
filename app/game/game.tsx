@@ -21,7 +21,7 @@ import { Map } from "../components/map";
 
 const herbs = [
   new Herb("Fiuncho", "Ule a anís", "Cura cousas", "Espanta demos"),
-  new Herb("Malva", "Cor lila", "Cura cousas", "Espanta demos"),
+  new Herb("Malva", "Flor bonita", "Cura cousas", "Espanta demos"),
   new Herb("Romeu", "Ule a cocido", "Cura cousas", "Espanta demos"),
   new Herb("Rosal silvestre", "Pincha moito", "Cura cousas", "Espanta demos"),
   new Herb("Herba luisa", "Floreciñas malvas", "Cura cousas", "Espanta demos"),
@@ -123,6 +123,22 @@ export function Game() {
         );
       }
       console.log("Picked herbs:", newPickedHerbs);
+
+      setHerbarium((prevHerbarium) => {
+        const newHerbarium = prevHerbarium.clonar();
+
+        for (const item of newPickedHerbs) {
+          if (!item) continue;
+
+          console.log("Engadindo herba ao herbario:", item.herb.name);
+          newHerbarium.addHerb(item.herb, position);
+        }
+
+        console.log("Herbario actualizado:", newHerbarium);
+
+        return newHerbarium;
+      });
+
       return newPickedHerbs;
     });
 
@@ -202,18 +218,6 @@ export function Game() {
       }
       return newSelectedHerbs;
     });
-
-    setHerbarium((prevHerbarium) => {
-      const newHerbarium = prevHerbarium.clonar();
-      if (item) {
-        console.log("Engadindo herba ao herbario:", item.herb.name);
-        newHerbarium.addHerb(item.herb);
-      }
-
-      console.log("Herbario actualizado:", newHerbarium);
-
-      return newHerbarium;
-    });
   };
 
   const recollerTodo = function (): void {
@@ -258,7 +262,7 @@ export function Game() {
           console.log("Herbario antes de estudar:", prevHerbarium);
           const newHerbarium = prevHerbarium.clonar();
           if (item) {
-            newHerbarium.studyHerb(item.herb);
+            newHerbarium.studyHerb(item.herb, position);
           }
           return newHerbarium;
         });
@@ -321,6 +325,8 @@ export function Game() {
         {herbarium.nameHerb(item)} <br />
       </Typography>
       <Typography variant="body1">
+        Encontrado en: {herbarium.getPlacesFound(item)}
+        <br />
         Propiedades mediciñais: {herbarium.getMedicalProperties(item)}
         <br />
         Propiedades máxicas: {herbarium.getMagicalProperties(item)}

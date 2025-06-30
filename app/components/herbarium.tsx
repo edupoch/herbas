@@ -1,5 +1,6 @@
 import { HerbariumEntry } from "./herbariumEntry";
 import { Herb } from "./herb";
+import { Place } from "./place";
 
 export class Herbarium {
   public entries: Record<string, HerbariumEntry> = {};
@@ -39,16 +40,24 @@ export class Herbarium {
     return "Descoñecidas";
   };
 
-  public addHerb = (herb: Herb): void => {
+  public getPlacesFound = (herb: Herb): string => {
+    if (this.entries[herb.name]) {
+      return this.entries[herb.name].placesFound.join(", ");
+    }
+    return "Descoñecidos";
+  };
+
+  public addHerb = (herb: Herb, place: Place): void => {
     if (!this.entries[herb.name]) {
       this.entries[herb.name] = new HerbariumEntry();
     }
+    this.entries[herb.name].addPlace(place);
   };
 
-  public studyHerb = (herb: Herb): void => {
+  public studyHerb = (herb: Herb, place: Place): void => {
     console.log(`Estudando a herba: ${herb.name}`);
 
-    this.addHerb(herb);
+    this.addHerb(herb, place);
 
     if (!this.entries[herb.name].identifiedName) {
       this.entries[herb.name].identifiedName = true;
