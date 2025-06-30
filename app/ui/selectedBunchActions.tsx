@@ -11,7 +11,7 @@ export default function SelectedBunchActions(
     bunch: Bunch;
     herbName: string;
     onRemove: () => void;
-    onIdentify: () => void;
+    onStudy: () => void;
   }
 ) {
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
@@ -31,8 +31,8 @@ export default function SelectedBunchActions(
     handleClose();
   };
 
-  const handleIdentify = () => {
-    props.onIdentify();
+  const handleStudy = () => {
+    props.onStudy();
     handleClose();
   };
 
@@ -69,9 +69,9 @@ export default function SelectedBunchActions(
         <Button
           style={{ width: "100%" }}
           variant="outlined"
-          onClick={handleIdentify}
+          onClick={handleStudy}
         >
-          Identificar
+          Estudar
         </Button>
       </Popover>
     </Grid>

@@ -12,6 +12,7 @@ import CircularProgressWithLabel from "../ui/circularProgressWithLabel";
 import SelectedBunchActions from "../ui/selectedBunchActions";
 
 import { Herb } from "../components/herb";
+import { Herbarium } from "../components/herbarium";
 import { Bunch } from "../components/bunch";
 import { Goal } from "../components/goal";
 import { Place } from "../components/place";
@@ -71,9 +72,6 @@ export function Game() {
   const [selectedHerbs, setSelectedHerbs] = useState(
     Array(maxSelectedHerbs).fill(null)
   );
-  const [identifiedHerbs, setIdentifiedHerbs] = useState(
-    Array(herbs.length).fill(null)
-  );
   const [ano, setAno] = useState(1);
   const [horas, setHoras] = useState(0);
 
@@ -86,6 +84,8 @@ export function Game() {
 
   const [position, setPosition] = useState(home);
   const [openModal, setOpenModal] = useState(false);
+
+  const [herbarium, setHerbarium] = useState(new Herbarium());
 
   const avanzarDia = function (percentaje: number) {
     setHoras((prevHoras) => {
@@ -206,10 +206,7 @@ export function Game() {
   };
 
   const nameHerb = (herb: Herb): string => {
-    const identifiedHerb = identifiedHerbs.find(
-      (identified) => identified && identified.name === herb.name
-    );
-    return identifiedHerb ? identifiedHerb.name : herb.ignorantName;
+    return herbarium.nameHerb(herb);
   };
 
   const pickedHerbsList = pickedHerbs.map((item, index) => (
@@ -237,18 +234,13 @@ export function Game() {
           return newSelectedHerbs;
         });
       }}
-      onIdentify={() => {
-        setIdentifiedHerbs((prevIdentifiedHerbs) => {
-          const newIdentifiedHerbs = [...prevIdentifiedHerbs];
+      onStudy={() => {
+        setHerbarium((prevHerbarium) => {
+          const newHerbarium = { ...prevHerbarium };
           if (item) {
-            const herbIndex = herbs.findIndex(
-              (herb) => herb.name === item.herb.name
-            );
-            if (herbIndex !== -1) {
-              newIdentifiedHerbs.push(item.herb);
-            }
+            newHerbarium.studyHerb(item.herb);
           }
-          return newIdentifiedHerbs;
+          return newHerbarium;
         });
 
         avanzarDia(10);
