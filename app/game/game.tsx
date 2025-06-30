@@ -66,7 +66,7 @@ const map = new Map([
   [null, new Place("Bosque", getRandomHerbs(3)), null],
 ]);
 
-const cachoDaFamilia = getRandomHerbs(7);
+const familyBouquet = getRandomHerbs(7);
 
 const maxFoundHerbs = 9;
 const minFoundHerbs = 3;
@@ -94,7 +94,7 @@ export function Game() {
   const [hours, setHours] = useState(0);
 
   const [goals, setGoals] = useState([
-    // new Goal("Cacho da túa familia", cachoDaFamilia),
+    // new Goal("Cacho da túa familia", familyBouquet),
     // new Goal("Cacho de Maruja", [herbs[0], herbs[1]]),
     new Goal("Ana", "A miña cor favorita é o lila", [herbs[1], herbs[4]]),
     new Goal("Alba", "A miña cor favorita é o amarelo", [herbs[7], herbs[11]]),
@@ -117,7 +117,6 @@ export function Game() {
     const nFoundHerbs =
       Math.floor(Math.random() * (maxFoundHerbs - minFoundHerbs)) +
       minFoundHerbs;
-    console.log("N found herbs:", nFoundHerbs);
 
     const tempFoundHerbs: Bunch[] = [];
 
@@ -141,7 +140,7 @@ export function Game() {
     });
 
     setHerbarium((prevHerbarium) => {
-      const newHerbarium = prevHerbarium.clonar();
+      const newHerbarium = prevHerbarium.clone();
       let hasNewHerbs = false;
 
       for (const item of tempFoundHerbs) {
@@ -152,8 +151,6 @@ export function Game() {
           hasNewHerbs = true;
         }
       }
-
-      console.log("Herbario actualizado:", newHerbarium);
 
       if (hasNewHerbs) {
         const message = `Atopaches novas herbas!`;
@@ -169,14 +166,11 @@ export function Game() {
 
   const createGift = function () {
     setGoals((prevGoals) => {
-      console.log("Ano", year);
-      console.log("==========");
       const newGoals = [];
 
       const filteredHerbs = selectedHerbs.filter((herb) => herb !== null);
 
       for (const goal of prevGoals) {
-        console.log("Comprobando obxectivo:", goal.name);
         if (goal.completed) {
           newGoals.push(goal);
           continue;
@@ -186,20 +180,15 @@ export function Game() {
         let includedHerbs = 0;
 
         for (const herb of filteredHerbs) {
-          console.log("Comprobando herba:", herb.herb.name);
           for (let i = 0; i < targetHerbs.length; i++) {
-            console.log("Comparando con:", targetHerbs[i].name);
             if (herb.herb.name === targetHerbs[i].name) {
               // Borramos a herba do obxectivo
               targetHerbs.splice(i, 1);
               includedHerbs++;
-              console.log("Herba atopada e eliminada:", herb.herb.name);
               break;
             }
           }
         }
-
-        console.log("\n");
 
         if (
           targetHerbs.length === 0 &&
@@ -323,8 +312,7 @@ export function Game() {
       }}
       onStudy={() => {
         setHerbarium((prevHerbarium) => {
-          console.log("Herbario antes de estudar:", prevHerbarium);
-          const newHerbarium = prevHerbarium.clonar();
+          const newHerbarium = prevHerbarium.clone();
           if (item) {
             const message = newHerbarium.studyHerb(item.herb, position);
             setSnackbarMessage(message);
@@ -351,7 +339,6 @@ export function Game() {
             disabled={!place}
             onClick={() => {
               if (!place) return;
-              console.log("Cambiando a posición:", place.name);
               setOpenModal(false);
               findHerbs(place);
               setPosition(place);

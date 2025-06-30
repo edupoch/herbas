@@ -12,7 +12,7 @@ export class HerbariumEntry {
     }
   }
 
-  public clonar(): HerbariumEntry {
+  public clone(): HerbariumEntry {
     const entry = new HerbariumEntry();
     entry.identifiedName = this.identifiedName;
     entry.identifiedMedicalProperties = this.identifiedMedicalProperties;

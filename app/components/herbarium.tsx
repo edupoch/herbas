@@ -83,12 +83,12 @@ export class Herbarium {
     }
   };
 
-  public clonar = (): Herbarium => {
+  public clone = (): Herbarium => {
     const newHerbarium = new Herbarium();
 
     for (const herbName in this.entries) {
       if (Object.prototype.hasOwnProperty.call(this.entries, herbName)) {
-        newHerbarium.entries[herbName] = this.entries[herbName].clonar();
+        newHerbarium.entries[herbName] = this.entries[herbName].clone();
       }
     }
 
