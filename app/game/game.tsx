@@ -18,23 +18,21 @@ import { Place } from "../components/place";
 import { Map } from "../components/map";
 
 const herbs = [
-  new Herb("Fiuncho"),
-  new Herb("Malva"),
-  new Herb("Romeu"),
-  new Herb("Rosal silvestre"),
-  new Herb("Herba de San Xoán"),
-  new Herb("Herba luisa"),
-  new Herb("Fento macho"),
-  new Herb("Sabugueiro"),
-  new Herb("Flor de San Xoán"),
-  new Herb("Codeso"),
-  new Herb("Nogueira"),
-  new Herb("Loureiro"),
-  new Herb("Torvisco"),
-  new Herb("Ruda"),
-  new Herb("Hierbabuena"),
-  new Herb("Salvia"),
-  new Herb("Artemisa"),
+  new Herb("Fiuncho", "Ule a anís"),
+  new Herb("Malva", "Cor lila"),
+  new Herb("Romeu", "Ule a cocido"),
+  new Herb("Rosal silvestre", "Pincha moito"),
+  new Herb("Herba luisa", "Floreciñas malvas"),
+  new Herb("Fento macho", "Plumeiro"),
+  new Herb("Sabugueiro", "Nubes brancas"),
+  new Herb("Flor de San Xoán", "Estrelas amarelas"),
+  new Herb("Nogueira", "Aperitivo en verán"),
+  new Herb("Loureiro", "Olor a comida"),
+  new Herb("Torvisco", "Arbusto con boliñas"),
+  new Herb("Ruda", "Nubes amarelas"),
+  new Herb("Hierbabuena", "Ule ben"),
+  new Herb("Salvia", "Nubes moradas"),
+  new Herb("Artemisa", "Arboliño pequeno"),
 ];
 
 function getRandomHerbs(count: number): Herb[] {
@@ -73,6 +71,9 @@ export function Game() {
   const [selectedHerbs, setSelectedHerbs] = useState(
     Array(maxSelectedHerbs).fill(null)
   );
+  const [identifiedHerbs, setIdentifiedHerbs] = useState(
+    Array(herbs.length).fill(null)
+  );
   const [ano, setAno] = useState(1);
   const [horas, setHoras] = useState(0);
 
@@ -85,6 +86,16 @@ export function Game() {
 
   const [position, setPosition] = useState(home);
   const [openModal, setOpenModal] = useState(false);
+
+  const avanzarDia = function (percentaje: number) {
+    setHoras((prevHoras) => {
+      const novasHoras = Math.min(
+        prevHoras + maxHoras * (percentaje / 100),
+        maxHoras
+      );
+      return novasHoras;
+    });
+  };
 
   const collerHerbas = function (position: Place) {
     const nPickedHerbs =
@@ -108,10 +119,7 @@ export function Game() {
       return newPickedHerbs;
     });
 
-    setHoras((prevHoras) => {
-      const novasHoras = prevHoras + maxHoras / 3;
-      return novasHoras;
-    });
+    avanzarDia(33);
   };
 
   const facerCacho = function () {
@@ -197,6 +205,13 @@ export function Game() {
     }
   };
 
+  const nameHerb = (herb: Herb): string => {
+    const identifiedHerb = identifiedHerbs.find(
+      (identified) => identified && identified.name === herb.name
+    );
+    return identifiedHerb ? identifiedHerb.name : herb.ignorantName;
+  };
+
   const pickedHerbsList = pickedHerbs.map((item, index) => (
     <Grid size={4} key={index}>
       <Button
@@ -205,7 +220,7 @@ export function Game() {
         onClick={() => recoller(item, index)}
         disabled={!item}
       >
-        {item ? `${item.herb.name}` : `Nada`}
+        {item ? `${nameHerb(item.herb)}` : `Nada`}
       </Button>
     </Grid>
   ));
@@ -214,12 +229,29 @@ export function Game() {
     <SelectedBunchActions
       key={index}
       bunch={item}
+      herbName={item ? nameHerb(item.herb) : "Nada"}
       onRemove={() => {
         setSelectedHerbs((prevSelectedHerbs) => {
           const newSelectedHerbs = [...prevSelectedHerbs];
           newSelectedHerbs[index] = null;
           return newSelectedHerbs;
         });
+      }}
+      onIdentify={() => {
+        setIdentifiedHerbs((prevIdentifiedHerbs) => {
+          const newIdentifiedHerbs = [...prevIdentifiedHerbs];
+          if (item) {
+            const herbIndex = herbs.findIndex(
+              (herb) => herb.name === item.herb.name
+            );
+            if (herbIndex !== -1) {
+              newIdentifiedHerbs.push(item.herb);
+            }
+          }
+          return newIdentifiedHerbs;
+        });
+
+        avanzarDia(10);
       }}
     />
   ));

@@ -9,7 +9,9 @@ import { Bunch } from "../components/bunch";
 export default function SelectedBunchActions(
   props: React.HTMLAttributes<HTMLDivElement> & {
     bunch: Bunch;
+    herbName: string;
     onRemove: () => void;
+    onIdentify: () => void;
   }
 ) {
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
@@ -29,6 +31,11 @@ export default function SelectedBunchActions(
     handleClose();
   };
 
+  const handleIdentify = () => {
+    props.onIdentify();
+    handleClose();
+  };
+
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
 
@@ -40,7 +47,7 @@ export default function SelectedBunchActions(
         onClick={handleClick}
         disabled={!props.bunch}
       >
-        {props.bunch ? `${props.bunch.herb.name}` : `Nada`}
+        {props.bunch ? `${props.herbName}` : `Nada`}
       </Button>
       <Popover
         id={id}
@@ -58,6 +65,13 @@ export default function SelectedBunchActions(
           onClick={handleRemove}
         >
           Tirar
+        </Button>
+        <Button
+          style={{ width: "100%" }}
+          variant="outlined"
+          onClick={handleIdentify}
+        >
+          Identificar
         </Button>
       </Popover>
     </Grid>
