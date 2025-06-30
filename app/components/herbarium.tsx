@@ -26,7 +26,7 @@ export class Herbarium {
     return herb.ignorantName;
   };
 
-  public getMedicalProperties = (herb: Herb): string => {
+  public getMedicalProperties = (herb: Herb): string | null => {
     if (
       this.entries[herb.name] &&
       this.entries[herb.name].identifiedMedicalProperties
@@ -34,10 +34,10 @@ export class Herbarium {
       return herb.medicalProperties;
     }
 
-    return "Descoñecidas";
+    return null;
   };
 
-  public getMagicalProperties = (herb: Herb): string => {
+  public getMagicalProperties = (herb: Herb): string | null => {
     if (
       this.entries[herb.name] &&
       this.entries[herb.name].identifiedMagicalProperties
@@ -45,14 +45,14 @@ export class Herbarium {
       return herb.magicalProperties;
     }
 
-    return "Descoñecidas";
+    return null;
   };
 
-  public getPlacesFound = (herb: Herb): string => {
+  public getPlacesFound = (herb: Herb): string | null => {
     if (this.entries[herb.name]) {
       return this.entries[herb.name].placesFound.join(", ");
     }
-    return "Descoñecidos";
+    return null;
   };
 
   public addHerb = (herb: Herb, place: Place): void => {
