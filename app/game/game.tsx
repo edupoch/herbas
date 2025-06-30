@@ -66,13 +66,14 @@ const map = new Map([
 
 const cachoDaFamilia = getRandomHerbs(7);
 
-export function Game() {
-  const maxPickedHerbs = 9;
-  const minPickedHerbs = 3;
-  const maxSelectedHerbs = 15;
-  const maxHoras = 10;
+const maxPickedHerbs = 9;
+const minPickedHerbs = 3;
+const maxSelectedHerbs = 15;
+const maxHoras = 10;
 
+export function Game() {
   const [activeSection, setActiveSection] = useState("home");
+  const [openModal, setOpenModal] = useState(false);
 
   const [pickedHerbs, setPickedHerbs] = useState(
     Array(maxPickedHerbs).fill(null)
@@ -91,8 +92,6 @@ export function Game() {
   ]);
 
   const [position, setPosition] = useState(home);
-  const [openModal, setOpenModal] = useState(false);
-
   const [herbarium, setHerbarium] = useState(new Herbarium());
 
   const avanzarDia = function (percentaje: number) {
@@ -205,7 +204,7 @@ export function Game() {
     });
 
     setHerbarium((prevHerbarium) => {
-      const newHerbarium = { ...prevHerbarium };
+      const newHerbarium = prevHerbarium.clonar();
       if (item) {
         console.log("Engadindo herba ao herbario:", item.herb.name);
         newHerbarium.addHerb(item.herb);
@@ -256,7 +255,8 @@ export function Game() {
       }}
       onStudy={() => {
         setHerbarium((prevHerbarium) => {
-          const newHerbarium = { ...prevHerbarium };
+          console.log("Herbario antes de estudar:", prevHerbarium);
+          const newHerbarium = prevHerbarium.clonar();
           if (item) {
             newHerbarium.studyHerb(item.herb);
           }
