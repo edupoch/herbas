@@ -9,12 +9,20 @@ export class Herbarium {
     return !!this.entries[herb.name];
   };
 
+  public isIdentified = (herb: Herb): boolean => {
+    return this.entries[herb.name] && this.entries[herb.name].identifiedName;
+  };
+
   public nameHerb = (herb: Herb): string => {
     if (this.entries[herb.name]) {
       return this.entries[herb.name].identifiedName
         ? herb.name
         : herb.ignorantName;
     }
+    return herb.ignorantName;
+  };
+
+  public getIgnorantName = (herb: Herb): string => {
     return herb.ignorantName;
   };
 
@@ -51,21 +59,26 @@ export class Herbarium {
     if (!this.entries[herb.name]) {
       this.entries[herb.name] = new HerbariumEntry();
     }
-    this.entries[herb.name].addPlace(place);
+    if (place.name !== "Casa") {
+      this.entries[herb.name].addPlace(place);
+    }
   };
 
-  public studyHerb = (herb: Herb, place: Place): void => {
+  public studyHerb = (herb: Herb, place: Place): string => {
     console.log(`Estudando a herba: ${herb.name}`);
 
     this.addHerb(herb, place);
 
     if (!this.entries[herb.name].identifiedName) {
       this.entries[herb.name].identifiedName = true;
+      return herb.name + " identificada!";
     } else {
       if (!this.entries[herb.name].identifiedMedicalProperties) {
         this.entries[herb.name].identifiedMedicalProperties = true;
+        return "Propiedades mediciñais identificadas!";
       } else {
         this.entries[herb.name].identifiedMagicalProperties = true;
+        return "Propiedades máxicas identificadas!";
       }
     }
   };

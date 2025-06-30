@@ -10,6 +10,7 @@ export default function SelectedBunchActions(
   props: React.HTMLAttributes<HTMLDivElement> & {
     bunch: Bunch;
     herbName: string;
+    hasTime: boolean;
     onRemove: () => void;
     onStudy: () => void;
   }
@@ -70,6 +71,7 @@ export default function SelectedBunchActions(
           style={{ width: "100%" }}
           variant="outlined"
           onClick={handleStudy}
+          disabled={!props.hasTime}
         >
           Estudar
         </Button>

@@ -8,6 +8,8 @@ import Grid from "@mui/material/Grid";
 import Modal from "@mui/material/Modal";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
+import Paper from "@mui/material/Paper";
+import Snackbar from "@mui/material/Snackbar";
 
 import CircularProgressWithLabel from "../ui/circularProgressWithLabel";
 import SelectedBunchActions from "../ui/selectedBunchActions";
@@ -66,23 +68,30 @@ const map = new Map([
 
 const cachoDaFamilia = getRandomHerbs(7);
 
+const maxFoundHerbs = 9;
+const minFoundHerbs = 3;
+
 const maxPickedHerbs = 9;
-const minPickedHerbs = 3;
+
 const maxSelectedHerbs = 15;
-const maxHoras = 10;
+const maxHours = 10;
 
 export function Game() {
   const [activeSection, setActiveSection] = useState("home");
   const [openModal, setOpenModal] = useState(false);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackBarMessage, setSnackbarMessage] = useState("");
 
+  const [foundHerbs, setFoundHerbs] = useState(Array(maxFoundHerbs).fill(null));
   const [pickedHerbs, setPickedHerbs] = useState(
     Array(maxPickedHerbs).fill(null)
   );
   const [selectedHerbs, setSelectedHerbs] = useState(
     Array(maxSelectedHerbs).fill(null)
   );
-  const [ano, setAno] = useState(1);
-  const [horas, setHoras] = useState(0);
+
+  const [year, setYear] = useState(1);
+  const [hours, setHours] = useState(0);
 
   const [goals, setGoals] = useState([
     // new Goal("Cacho da túa familia", cachoDaFamilia),
@@ -94,66 +103,73 @@ export function Game() {
   const [position, setPosition] = useState(home);
   const [herbarium, setHerbarium] = useState(new Herbarium());
 
-  const avanzarDia = function (percentaje: number) {
-    setHoras((prevHoras) => {
-      const novasHoras = Math.min(
-        prevHoras + maxHoras * (percentaje / 100),
-        maxHoras
+  const advanceInDay = function (percentaje: number) {
+    setHours((prevHours) => {
+      const newHours = Math.min(
+        prevHours + maxHours * (percentaje / 100),
+        maxHours
       );
-      return novasHoras;
+      return newHours;
     });
   };
 
-  const collerHerbas = function (position: Place) {
-    const nPickedHerbs =
-      Math.floor(Math.random() * (maxPickedHerbs - minPickedHerbs)) +
-      minPickedHerbs;
-    console.log("N picked herbs:", nPickedHerbs);
+  const findHerbs = function (position: Place) {
+    const nFoundHerbs =
+      Math.floor(Math.random() * (maxFoundHerbs - minFoundHerbs)) +
+      minFoundHerbs;
+    console.log("N found herbs:", nFoundHerbs);
 
-    const tempPickedHerbs: Bunch[] = [];
+    const tempFoundHerbs: Bunch[] = [];
 
     if (position.herbs.length > 0) {
-      for (let i = 0; i < nPickedHerbs; i++) {
-        tempPickedHerbs[i] = new Bunch(
+      for (let i = 0; i < nFoundHerbs; i++) {
+        tempFoundHerbs[i] = new Bunch(
           position.herbs[Math.floor(Math.random() * position.herbs.length)]
         );
       }
     }
 
-    setPickedHerbs((prevpickedHerbs) => {
-      const newPickedHerbs = [...prevpickedHerbs];
-      newPickedHerbs.fill(null);
+    setFoundHerbs((prevFoundHerbs) => {
+      const newFoundHerbs = [...prevFoundHerbs];
+      newFoundHerbs.fill(null);
 
-      for (let i = 0; i < nPickedHerbs; i++) {
-        newPickedHerbs[i] = tempPickedHerbs[i];
+      for (let i = 0; i < nFoundHerbs; i++) {
+        newFoundHerbs[i] = tempFoundHerbs[i];
       }
 
-      return newPickedHerbs;
+      return newFoundHerbs;
     });
 
     setHerbarium((prevHerbarium) => {
       const newHerbarium = prevHerbarium.clonar();
+      let hasNewHerbs = false;
 
-      for (const item of tempPickedHerbs) {
+      for (const item of tempFoundHerbs) {
         if (!item) continue;
 
-        console.log("Engadindo herba ao herbario:", item.herb.name);
-        newHerbarium.addHerb(item.herb, position);
+        if (!newHerbarium.hasHerb(item.herb)) {
+          newHerbarium.addHerb(item.herb, position);
+          hasNewHerbs = true;
+        }
       }
 
       console.log("Herbario actualizado:", newHerbarium);
 
+      if (hasNewHerbs) {
+        const message = `Atopaches novas herbas!`;
+        setSnackbarMessage(message);
+        setOpenSnackbar(true);
+      }
+
       return newHerbarium;
     });
 
-    avanzarDia(33);
+    advanceInDay(34);
   };
 
-  const facerCacho = function () {
-    const cacho = pickedHerbs.filter((item) => item !== null);
-
+  const createGift = function () {
     setGoals((prevGoals) => {
-      console.log("Ano", ano);
+      console.log("Ano", year);
       console.log("==========");
       const newGoals = [];
 
@@ -198,36 +214,61 @@ export function Game() {
       return newGoals;
     });
 
-    setPickedHerbs(Array(maxPickedHerbs).fill(null));
+    setFoundHerbs(Array(maxFoundHerbs).fill(null));
+    setPickedHerbs(Array(maxFoundHerbs).fill(null));
     setSelectedHerbs(Array(maxSelectedHerbs).fill(null));
-    setAno(ano + 1);
-    setHoras(0);
+    setYear(year + 1);
+    setHours(0);
     setPosition(home);
   };
 
-  const recoller = function (item: Bunch | null, index: number): void {
+  const pickHerb = function (item: Bunch | null, index: number): void {
+    setFoundHerbs((prevFoundHerbs) => {
+      const newFoundHerbs = [...prevFoundHerbs];
+      newFoundHerbs[index] = null;
+      return newFoundHerbs;
+    });
+
+    setPickedHerbs((prevPickedHerbs: (Bunch | null)[]) => {
+      const newPickedHerbs = [...prevPickedHerbs];
+      for (let i = 0; i < newPickedHerbs.length; i++) {
+        if (newPickedHerbs[i] === null) {
+          newPickedHerbs[i] = item;
+          break;
+        }
+      }
+      return newPickedHerbs;
+    });
+  };
+
+  const selectHerbInBasket = function (
+    item: Bunch | null,
+    index: number
+  ): void {
     setPickedHerbs((prevpickedHerbs) => {
       const newPickedHerbs = [...prevpickedHerbs];
       newPickedHerbs[index] = null;
       return newPickedHerbs;
     });
 
-    setSelectedHerbs((prevSelectedHerbs: (Bunch | null)[]) => {
-      const newSelectedHerbs = [...prevSelectedHerbs];
-      for (let i = 0; i < newSelectedHerbs.length; i++) {
-        if (newSelectedHerbs[i] === null) {
-          newSelectedHerbs[i] = item;
-          break;
+    if (position.name === home.name) {
+      setSelectedHerbs((prevSelectedHerbs: (Bunch | null)[]) => {
+        const newSelectedHerbs = [...prevSelectedHerbs];
+        for (let i = 0; i < newSelectedHerbs.length; i++) {
+          if (newSelectedHerbs[i] === null) {
+            newSelectedHerbs[i] = item;
+            break;
+          }
         }
-      }
-      return newSelectedHerbs;
-    });
+        return newSelectedHerbs;
+      });
+    }
   };
 
-  const recollerTodo = function (): void {
+  const pickAllHerbs = function (): void {
     for (let i = 0; i < pickedHerbs.length; i++) {
       if (pickedHerbs[i] !== null) {
-        recoller(pickedHerbs[i], i);
+        pickHerb(pickedHerbs[i], i);
       }
     }
   };
@@ -236,12 +277,30 @@ export function Game() {
     return herbarium.nameHerb(herb);
   };
 
+  const goHome = function () {
+    setPosition(home);
+    advanceInDay(100);
+  };
+
+  const foundHerbsList = foundHerbs.map((item, index) => (
+    <Grid size={4} key={index}>
+      <Button
+        style={{ width: "100%" }}
+        variant="outlined"
+        onClick={() => pickHerb(item, index)}
+        disabled={!item}
+      >
+        {item ? `${nameHerb(item.herb)}` : `Nada`}
+      </Button>
+    </Grid>
+  ));
+
   const pickedHerbsList = pickedHerbs.map((item, index) => (
     <Grid size={4} key={index}>
       <Button
         style={{ width: "100%" }}
         variant="outlined"
-        onClick={() => recoller(item, index)}
+        onClick={() => selectHerbInBasket(item, index)}
         disabled={!item}
       >
         {item ? `${nameHerb(item.herb)}` : `Nada`}
@@ -254,6 +313,7 @@ export function Game() {
       key={index}
       bunch={item}
       herbName={item ? nameHerb(item.herb) : "Nada"}
+      hasTime={hours < maxHours}
       onRemove={() => {
         setSelectedHerbs((prevSelectedHerbs) => {
           const newSelectedHerbs = [...prevSelectedHerbs];
@@ -266,12 +326,14 @@ export function Game() {
           console.log("Herbario antes de estudar:", prevHerbarium);
           const newHerbarium = prevHerbarium.clonar();
           if (item) {
-            newHerbarium.studyHerb(item.herb, position);
+            const message = newHerbarium.studyHerb(item.herb, position);
+            setSnackbarMessage(message);
+            setOpenSnackbar(true);
           }
           return newHerbarium;
         });
 
-        avanzarDia(10);
+        advanceInDay(10);
       }}
     />
   ));
@@ -291,7 +353,7 @@ export function Game() {
               if (!place) return;
               console.log("Cambiando a posición:", place.name);
               setOpenModal(false);
-              collerHerbas(place);
+              findHerbs(place);
               setPosition(place);
             }}
           >
@@ -318,30 +380,52 @@ export function Game() {
     </Typography>
   ));
 
-  const herbariumList = herbs.map((item, index) => (
-    <div
-      style={{
-        display: herbarium.hasHerb(item) ? "block" : "none",
-        marginBottom: "16px",
-      }}
-    >
-      <Typography key={`herb-${index}`} variant="h4">
-        {herbarium.nameHerb(item)} <br />
-      </Typography>
-      <Typography variant="body1">
-        Encontrado en: {herbarium.getPlacesFound(item)}
-        <br />
-        Propiedades mediciñais: {herbarium.getMedicalProperties(item)}
-        <br />
-        Propiedades máxicas: {herbarium.getMagicalProperties(item)}
-      </Typography>
-    </div>
-  ));
+  const herbariumList = herbs.map((item, index) => {
+    if (!herbarium.hasHerb(item)) return null;
+
+    return (
+      <Grid size={4}>
+        <Paper variant="elevation" style={{ padding: "16px" }}>
+          <Typography key={`herb-${index}`} variant="h5">
+            {herbarium.nameHerb(item)}
+          </Typography>
+          <Typography variant="body1">
+            <div
+              style={{
+                display: herbarium.isIdentified(item) ? "inline" : "none",
+              }}
+            >
+              <em>{herbarium.getIgnorantName(item)}</em>
+              <br />
+            </div>
+            <div
+              style={{
+                display: !herbarium.isIdentified(item) ? "inline" : "none",
+              }}
+            >
+              <br />
+            </div>
+            <br />
+            <b>Encontrado en</b>
+            <br /> {herbarium.getPlacesFound(item)}
+            <br />
+            <br />
+            <b>Propiedades mediciñais</b>
+            <br /> {herbarium.getMedicalProperties(item)}
+            <br />
+            <br />
+            <b>Propiedades máxicas</b>
+            <br /> {herbarium.getMagicalProperties(item)}
+          </Typography>
+        </Paper>
+      </Grid>
+    );
+  });
 
   return (
     <Container maxWidth="md">
       <Typography variant="h4" gutterBottom>
-        Ano {ano}
+        Ano {year}
       </Typography>
       <Tabs
         style={{ marginBottom: "16px" }}
@@ -352,9 +436,6 @@ export function Game() {
         <Tab label="Herbario" value="herbarium" />
       </Tabs>
       <div hidden={activeSection !== "home"}>
-        <Typography variant="body1" gutterBottom>
-          Posición: {position.name}
-        </Typography>
         <Grid container>
           <Grid size={8}>
             <Grid
@@ -371,9 +452,11 @@ export function Game() {
                   key="coller-herbas"
                   variant="contained"
                   onClick={() => setOpenModal(true)}
-                  disabled={horas >= maxHoras}
+                  style={{
+                    display: hours < maxHours ? "block" : "none",
+                  }}
                 >
-                  Ir coller herbas
+                  Cambiar de lugar
                 </Button>
                 <Modal open={openModal} onClose={() => setOpenModal(false)}>
                   <Box
@@ -394,12 +477,49 @@ export function Game() {
                     {placesList}
                   </Box>
                 </Modal>
+                <Button
+                  key="volver-casa"
+                  variant="contained"
+                  onClick={goHome}
+                  style={{
+                    display:
+                      position.name !== home.name && hours >= maxHours
+                        ? "block"
+                        : "none",
+                  }}
+                >
+                  Volver a casa
+                </Button>
               </Grid>
 
               <Grid size={1}>
-                <CircularProgressWithLabel value={(horas / maxHoras) * 100} />
+                <CircularProgressWithLabel value={(hours / maxHours) * 100} />
               </Grid>
             </Grid>
+
+            <div
+              style={{
+                display: position.name !== home.name ? "block" : "none",
+              }}
+            >
+              <Grid size={6}>
+                <Typography variant="h5" gutterBottom>
+                  {position.name}
+                </Typography>
+              </Grid>
+
+              <Grid
+                style={{
+                  marginTop: "16px",
+                  marginBottom: "32px",
+                }}
+                container
+                rowSpacing={2}
+                columnSpacing={2}
+              >
+                {foundHerbsList}
+              </Grid>
+            </div>
 
             <Grid
               style={{ marginTop: "16px", marginBottom: "16px" }}
@@ -415,20 +535,13 @@ export function Game() {
                   Cesto
                 </Typography>
               </Grid>
-
-              <Grid size={6}>
-                <Button
-                  variant="contained"
-                  onClick={recollerTodo}
-                  style={{ float: "right" }}
-                >
-                  Coller todo
-                </Button>
-              </Grid>
             </Grid>
 
             <Grid
-              style={{ marginTop: "16px", marginBottom: "32px" }}
+              style={{
+                marginTop: "16px",
+                marginBottom: "32px",
+              }}
               container
               rowSpacing={2}
               columnSpacing={2}
@@ -436,22 +549,28 @@ export function Game() {
               {pickedHerbsList}
             </Grid>
 
-            <Typography variant="h5" gutterBottom>
-              Herbas seleccionadas
-            </Typography>
-
-            <Grid
-              style={{ marginTop: "16px", marginBottom: "16px" }}
-              container
-              rowSpacing={2}
-              columnSpacing={2}
+            <div
+              style={{
+                display: position.name === home.name ? "block" : "none",
+              }}
             >
-              {selectedHerbsList}
-            </Grid>
+              <Typography variant="h5" gutterBottom>
+                Mesa
+              </Typography>
 
-            <Button variant="contained" onClick={facerCacho}>
-              Facer o cacho
-            </Button>
+              <Grid
+                style={{ marginTop: "16px", marginBottom: "16px" }}
+                container
+                rowSpacing={2}
+                columnSpacing={2}
+              >
+                {selectedHerbsList}
+              </Grid>
+
+              <Button variant="contained" onClick={createGift}>
+                Facer o cacho
+              </Button>
+            </div>
           </Grid>
           <Grid style={{ paddingLeft: "32px" }} size={4}>
             <Typography variant="h5" gutterBottom>
@@ -461,7 +580,17 @@ export function Game() {
           </Grid>
         </Grid>
       </div>
-      <div hidden={activeSection !== "herbarium"}>{herbariumList}</div>
+      <div hidden={activeSection !== "herbarium"}>
+        <Grid container rowSpacing={2} columnSpacing={2}>
+          {herbariumList}
+        </Grid>
+      </div>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={3000}
+        onClose={() => setOpenSnackbar(false)}
+        message={snackBarMessage}
+      />
     </Container>
   );
 }
