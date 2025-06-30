@@ -6,7 +6,8 @@ import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Modal from "@mui/material/Modal";
-import Stack from "@mui/material/Stack";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
 
 import CircularProgressWithLabel from "../ui/circularProgressWithLabel";
 import SelectedBunchActions from "../ui/selectedBunchActions";
@@ -19,21 +20,26 @@ import { Place } from "../components/place";
 import { Map } from "../components/map";
 
 const herbs = [
-  new Herb("Fiuncho", "Ule a anís"),
-  new Herb("Malva", "Cor lila"),
-  new Herb("Romeu", "Ule a cocido"),
-  new Herb("Rosal silvestre", "Pincha moito"),
-  new Herb("Herba luisa", "Floreciñas malvas"),
-  new Herb("Fento macho", "Plumeiro"),
-  new Herb("Sabugueiro", "Nubes brancas"),
-  new Herb("Flor de San Xoán", "Estrelas amarelas"),
-  new Herb("Nogueira", "Aperitivo en verán"),
-  new Herb("Loureiro", "Olor a comida"),
-  new Herb("Torvisco", "Arbusto con boliñas"),
-  new Herb("Ruda", "Nubes amarelas"),
-  new Herb("Hierbabuena", "Ule ben"),
-  new Herb("Salvia", "Nubes moradas"),
-  new Herb("Artemisa", "Arboliño pequeno"),
+  new Herb("Fiuncho", "Ule a anís", "Cura cousas", "Espanta demos"),
+  new Herb("Malva", "Cor lila", "Cura cousas", "Espanta demos"),
+  new Herb("Romeu", "Ule a cocido", "Cura cousas", "Espanta demos"),
+  new Herb("Rosal silvestre", "Pincha moito", "Cura cousas", "Espanta demos"),
+  new Herb("Herba luisa", "Floreciñas malvas", "Cura cousas", "Espanta demos"),
+  new Herb("Fento macho", "Plumeiro", "Cura cousas", "Espanta demos"),
+  new Herb("Sabugueiro", "Nubes brancas", "Cura cousas", "Espanta demos"),
+  new Herb(
+    "Flor de San Xoán",
+    "Estrelas amarelas",
+    "Cura cousas",
+    "Espanta demos"
+  ),
+  new Herb("Nogueira", "Aperitivo en verán", "Cura cousas", "Espanta demos"),
+  new Herb("Loureiro", "Olor a comida", "Cura cousas", "Espanta demos"),
+  new Herb("Torvisco", "Arbusto con boliñas", "Cura cousas", "Espanta demos"),
+  new Herb("Ruda", "Nubes amarelas", "Cura cousas", "Espanta demos"),
+  new Herb("Hierbabuena", "Ule ben", "Cura cousas", "Espanta demos"),
+  new Herb("Salvia", "Nubes moradas", "Cura cousas", "Espanta demos"),
+  new Herb("Artemisa", "Arboliño pequeno", "Cura cousas", "Espanta demos"),
 ];
 
 function getRandomHerbs(count: number): Herb[] {
@@ -65,6 +71,8 @@ export function Game() {
   const minPickedHerbs = 3;
   const maxSelectedHerbs = 15;
   const maxHoras = 10;
+
+  const [activeSection, setActiveSection] = useState("home");
 
   const [pickedHerbs, setPickedHerbs] = useState(
     Array(maxPickedHerbs).fill(null)
@@ -178,14 +186,14 @@ export function Game() {
     setPosition(home);
   };
 
-  const recoller = function (item: string | null, index: number): void {
+  const recoller = function (item: Bunch | null, index: number): void {
     setPickedHerbs((prevpickedHerbs) => {
       const newPickedHerbs = [...prevpickedHerbs];
       newPickedHerbs[index] = null;
       return newPickedHerbs;
     });
 
-    setSelectedHerbs((prevSelectedHerbs: (string | null)[]) => {
+    setSelectedHerbs((prevSelectedHerbs: (Bunch | null)[]) => {
       const newSelectedHerbs = [...prevSelectedHerbs];
       for (let i = 0; i < newSelectedHerbs.length; i++) {
         if (newSelectedHerbs[i] === null) {
@@ -194,6 +202,18 @@ export function Game() {
         }
       }
       return newSelectedHerbs;
+    });
+
+    setHerbarium((prevHerbarium) => {
+      const newHerbarium = { ...prevHerbarium };
+      if (item) {
+        console.log("Engadindo herba ao herbario:", item.herb.name);
+        newHerbarium.addHerb(item.herb);
+      }
+
+      console.log("Herbario actualizado:", newHerbarium);
+
+      return newHerbarium;
     });
   };
 
@@ -290,119 +310,148 @@ export function Game() {
     </Typography>
   ));
 
+  const herbariumList = herbs.map((item, index) => (
+    <div
+      style={{
+        display: herbarium.hasHerb(item) ? "block" : "none",
+        marginBottom: "16px",
+      }}
+    >
+      <Typography key={`herb-${index}`} variant="h4">
+        {herbarium.nameHerb(item)} <br />
+      </Typography>
+      <Typography variant="body1">
+        Propiedades mediciñais: {herbarium.getMedicalProperties(item)}
+        <br />
+        Propiedades máxicas: {herbarium.getMagicalProperties(item)}
+      </Typography>
+    </div>
+  ));
+
   return (
     <Container maxWidth="md">
       <Typography variant="h4" gutterBottom>
         Ano {ano}
       </Typography>
-      <Typography variant="body1" gutterBottom>
-        Posición: {position.name}
-      </Typography>
-      <Grid container>
-        <Grid size={8}>
-          <Grid
-            style={{ marginTop: "16px", marginBottom: "16px" }}
-            container
-            direction="row"
-            sx={{
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Grid size={4}>
-              <Button
-                key="coller-herbas"
-                variant="contained"
-                onClick={() => setOpenModal(true)}
-                disabled={horas >= maxHoras}
-              >
-                Ir coller herbas
-              </Button>
-              <Modal open={openModal} onClose={() => setOpenModal(false)}>
-                <Box
-                  sx={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    width: 800,
-                    bgcolor: "background.paper",
-                    boxShadow: 24,
-                    p: 4,
-                  }}
+      <Tabs
+        style={{ marginBottom: "16px" }}
+        value={activeSection}
+        onChange={(event, section) => setActiveSection(section)}
+      >
+        <Tab label="Cesto" value="home" />
+        <Tab label="Herbario" value="herbarium" />
+      </Tabs>
+      <div hidden={activeSection !== "home"}>
+        <Typography variant="body1" gutterBottom>
+          Posición: {position.name}
+        </Typography>
+        <Grid container>
+          <Grid size={8}>
+            <Grid
+              style={{ marginTop: "16px", marginBottom: "16px" }}
+              container
+              direction="row"
+              sx={{
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Grid size={4}>
+                <Button
+                  key="coller-herbas"
+                  variant="contained"
+                  onClick={() => setOpenModal(true)}
+                  disabled={horas >= maxHoras}
                 >
-                  <Typography variant="h6" component="h2" sx={{ mb: "16px" }}>
-                    Lugares
-                  </Typography>
-                  {placesList}
-                </Box>
-              </Modal>
+                  Ir coller herbas
+                </Button>
+                <Modal open={openModal} onClose={() => setOpenModal(false)}>
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      transform: "translate(-50%, -50%)",
+                      width: 800,
+                      bgcolor: "background.paper",
+                      boxShadow: 24,
+                      p: 4,
+                    }}
+                  >
+                    <Typography variant="h6" component="h2" sx={{ mb: "16px" }}>
+                      Lugares
+                    </Typography>
+                    {placesList}
+                  </Box>
+                </Modal>
+              </Grid>
+
+              <Grid size={1}>
+                <CircularProgressWithLabel value={(horas / maxHoras) * 100} />
+              </Grid>
             </Grid>
 
-            <Grid size={1}>
-              <CircularProgressWithLabel value={(horas / maxHoras) * 100} />
+            <Grid
+              style={{ marginTop: "16px", marginBottom: "16px" }}
+              container
+              direction="row"
+              sx={{
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Grid size={6}>
+                <Typography variant="h5" gutterBottom>
+                  Cesto
+                </Typography>
+              </Grid>
+
+              <Grid size={6}>
+                <Button
+                  variant="contained"
+                  onClick={recollerTodo}
+                  style={{ float: "right" }}
+                >
+                  Coller todo
+                </Button>
+              </Grid>
             </Grid>
-          </Grid>
 
-          <Grid
-            style={{ marginTop: "16px", marginBottom: "16px" }}
-            container
-            direction="row"
-            sx={{
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Grid size={6}>
-              <Typography variant="h5" gutterBottom>
-                Cesto
-              </Typography>
+            <Grid
+              style={{ marginTop: "16px", marginBottom: "32px" }}
+              container
+              rowSpacing={2}
+              columnSpacing={2}
+            >
+              {pickedHerbsList}
             </Grid>
 
-            <Grid size={6}>
-              <Button
-                variant="contained"
-                onClick={recollerTodo}
-                style={{ float: "right" }}
-              >
-                Coller todo
-              </Button>
+            <Typography variant="h5" gutterBottom>
+              Herbas seleccionadas
+            </Typography>
+
+            <Grid
+              style={{ marginTop: "16px", marginBottom: "16px" }}
+              container
+              rowSpacing={2}
+              columnSpacing={2}
+            >
+              {selectedHerbsList}
             </Grid>
+
+            <Button variant="contained" onClick={facerCacho}>
+              Facer o cacho
+            </Button>
           </Grid>
-
-          <Grid
-            style={{ marginTop: "16px", marginBottom: "32px" }}
-            container
-            rowSpacing={2}
-            columnSpacing={2}
-          >
-            {pickedHerbsList}
+          <Grid style={{ paddingLeft: "32px" }} size={4}>
+            <Typography variant="h5" gutterBottom>
+              Retos
+            </Typography>
+            {goalsList}
           </Grid>
-
-          <Typography variant="h5" gutterBottom>
-            Herbas seleccionadas
-          </Typography>
-
-          <Grid
-            style={{ marginTop: "16px", marginBottom: "16px" }}
-            container
-            rowSpacing={2}
-            columnSpacing={2}
-          >
-            {selectedHerbsList}
-          </Grid>
-
-          <Button variant="contained" onClick={facerCacho}>
-            Facer o cacho
-          </Button>
         </Grid>
-        <Grid style={{ paddingLeft: "32px" }} size={4}>
-          <Typography variant="h5" gutterBottom>
-            Retos
-          </Typography>
-          {goalsList}
-        </Grid>
-      </Grid>
+      </div>
+      <div hidden={activeSection !== "herbarium"}>{herbariumList}</div>
     </Container>
   );
 }
