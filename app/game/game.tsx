@@ -85,10 +85,10 @@ export function Game() {
   const [horas, setHoras] = useState(0);
 
   const [goals, setGoals] = useState([
-    new Goal("Cacho da túa familia", cachoDaFamilia),
-    new Goal("Cacho de Maruja", [herbs[0], herbs[1]]),
-    new Goal("Cacho de Ana", [herbs[2], herbs[3]]),
-    new Goal("Cacho de Alba", [herbs[4], herbs[5]]),
+    // new Goal("Cacho da túa familia", cachoDaFamilia),
+    // new Goal("Cacho de Maruja", [herbs[0], herbs[1]]),
+    new Goal("Ana", "A miña cor favorita é o lila", [herbs[1], herbs[4]]),
+    new Goal("Alba", "A miña cor favorita é o amarelo", [herbs[7], herbs[11]]),
   ]);
 
   const [position, setPosition] = useState(home);
@@ -110,36 +110,40 @@ export function Game() {
       minPickedHerbs;
     console.log("N picked herbs:", nPickedHerbs);
 
-    setPickedHerbs((prevpickedHerbs) => {
-      const newPickedHerbs = [...prevpickedHerbs];
-      console.log("Position herbs:", position.herbs);
-      newPickedHerbs.fill(null);
+    const tempPickedHerbs: Bunch[] = [];
+
+    if (position.herbs.length > 0) {
       for (let i = 0; i < nPickedHerbs; i++) {
-        if (position.herbs.length === 0) {
-          break;
-        }
-        newPickedHerbs[i] = new Bunch(
+        tempPickedHerbs[i] = new Bunch(
           position.herbs[Math.floor(Math.random() * position.herbs.length)]
         );
       }
-      console.log("Picked herbs:", newPickedHerbs);
+    }
 
-      setHerbarium((prevHerbarium) => {
-        const newHerbarium = prevHerbarium.clonar();
+    setPickedHerbs((prevpickedHerbs) => {
+      const newPickedHerbs = [...prevpickedHerbs];
+      newPickedHerbs.fill(null);
 
-        for (const item of newPickedHerbs) {
-          if (!item) continue;
-
-          console.log("Engadindo herba ao herbario:", item.herb.name);
-          newHerbarium.addHerb(item.herb, position);
-        }
-
-        console.log("Herbario actualizado:", newHerbarium);
-
-        return newHerbarium;
-      });
+      for (let i = 0; i < nPickedHerbs; i++) {
+        newPickedHerbs[i] = tempPickedHerbs[i];
+      }
 
       return newPickedHerbs;
+    });
+
+    setHerbarium((prevHerbarium) => {
+      const newHerbarium = prevHerbarium.clonar();
+
+      for (const item of tempPickedHerbs) {
+        if (!item) continue;
+
+        console.log("Engadindo herba ao herbario:", item.herb.name);
+        newHerbarium.addHerb(item.herb, position);
+      }
+
+      console.log("Herbario actualizado:", newHerbarium);
+
+      return newHerbarium;
     });
 
     avanzarDia(33);
@@ -310,7 +314,7 @@ export function Game() {
     >
       <b>{item.name}</b>
       <br />
-      {item.herbs.map((herb) => herb.name).join(", ")}
+      {item.description}
     </Typography>
   ));
 
