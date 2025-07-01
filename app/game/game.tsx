@@ -62,19 +62,28 @@ function getRandomHerbs(count: number): Herb[] {
 
 const home = new Place("Casa", []);
 
+// Reordeamos as herbas aleatoriamente
+herbs.sort(() => 0.5 - Math.random());
+
 const map = new Map([
   [
     null,
-    new Place("Monte", getRandomHerbs(3)),
-    new Place("Cemiterio", getRandomHerbs(3)),
+    new Place("Monte", herbs.slice(0, 3).concat(getRandomHerbs(1))),
+    new Place("Cemiterio", herbs.slice(3, 6).concat(getRandomHerbs(1))),
   ],
   [
-    new Place("Río", getRandomHerbs(3)),
+    new Place("Río", herbs.slice(6, 9).concat(getRandomHerbs(1))),
     home,
-    new Place("Igrexa", getRandomHerbs(3)),
+    new Place("Igrexa", herbs.slice(9, 12).concat(getRandomHerbs(1))),
   ],
-  [null, new Place("Bosque", getRandomHerbs(3)), null],
+  [
+    null,
+    new Place("Bosque", herbs.slice(12, 15).concat(getRandomHerbs(1))),
+    null,
+  ],
 ]);
+
+console.log("Map", map);
 
 const familyBouquet = getRandomHerbs(7);
 
@@ -108,8 +117,14 @@ export function Game() {
   const [goals, setGoals] = useState([
     // new Goal("Cacho da túa familia", familyBouquet),
     // new Goal("Cacho de Maruja", [herbs[0], herbs[1]]),
-    new Goal("Ana", "A miña cor favorita é o lila", [herbs[1], herbs[4]]),
-    new Goal("Alba", "A miña cor favorita é o amarelo", [herbs[7], herbs[11]]),
+    new Goal("Ana", "A miña cor favorita é o lila", [
+      herbs.filter((herb) => herb.name == "Malva")[0],
+      herbs.filter((herb) => herb.name == "Herba luisa")[0],
+    ]),
+    new Goal("Alba", "A miña cor favorita é o amarelo", [
+      herbs.filter((herb) => herb.name == "Flor de San Xoán")[0],
+      herbs.filter((herb) => herb.name == "Ruda")[0],
+    ]),
   ]);
 
   const [position, setPosition] = useState(home);
