@@ -159,9 +159,9 @@ export function Game() {
         if (!item) continue;
 
         if (!newHerbarium.hasHerb(item.herb)) {
-          newHerbarium.addHerb(item.herb, position);
           hasNewHerbs = true;
         }
+        newHerbarium.addHerb(item.herb, position);
       }
 
       if (hasNewHerbs) {
